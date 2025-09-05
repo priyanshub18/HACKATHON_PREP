@@ -410,63 +410,63 @@ const StockManagement = () => {
                 {filteredItems.map((item) => {
                   const stockLevel = getStockLevel(item.currentStock, item.minStock, item.maxStock);
                   return (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={item.id} className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-200">
+                      <td className="px-8 py-6 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold">
-                            <Package className="w-5 h-5" />
+                          <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            <Package className="w-7 h-7" />
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{item.productName}</div>
-                            <div className="text-sm text-gray-500">SKU: {item.sku}</div>
+                          <div className="ml-6">
+                            <div className="text-lg font-bold text-gray-900">{item.productName}</div>
+                            <div className="text-sm text-gray-500 font-medium">SKU: {item.sku}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="text-lg font-bold text-gray-900">
                           <span className={stockLevel.color}>{item.currentStock}</span> units
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 font-medium">
                           Min: {item.minStock} | Max: {item.maxStock}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-gray-400 font-medium">
                           Reorder at: {item.reorderPoint}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 font-medium">
                         {item.location}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <span className={`inline-flex px-4 py-2 text-sm font-bold rounded-xl ${getStatusColor(item.status)}`}>
                           {getStatusText(item.status)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-                        <Calendar className="w-3 h-3 mr-1" />
+                      <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 flex items-center font-medium">
+                        <Calendar className="w-4 h-4 mr-2" />
                         {new Date(item.lastUpdated).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
+                      <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-3">
                           <button
                             onClick={() => openMovementModal(item)}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-all duration-200"
                             title="Stock Movement"
                           >
-                            {stockMovement.type === 'in' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                            {stockMovement.type === 'in' ? <ArrowUp className="w-5 h-5" /> : <ArrowDown className="w-5 h-5" />}
                           </button>
                           <button
                             onClick={() => openEditModal(item)}
-                            className="text-green-600 hover:text-green-900 p-1 rounded"
+                            className="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-all duration-200"
                             title="Edit"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => openDeleteModal(item)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                            className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-all duration-200"
                             title="Delete"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
