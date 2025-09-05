@@ -7,12 +7,14 @@ import UserManagement from './components/UserManagement'
 import ProductSupplierManagement from './components/ProductSupplierManagement'
 import StockManagement from './components/StockManagement'
 import ManagerLanding from './components/ManagerLanding'
+import StaffLanding from './components/StaffLanding'
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
           {/* Default route redirects to landing page */}
+          {/* COMMENT : Default path for landing  */}
           <Route path="/" element={<Navigate to="/landing" replace />} />
           
           {/* Landing page route */}
@@ -33,6 +35,12 @@ function App() {
           <Route path="/manager/products" element={<ProductSupplierManagement />} />
           <Route path="/manager/stock" element={<StockManagement />} />
           
+
+
+          {/* Staff routes */}
+          <Route path="/staff" element={<StaffLanding />} />
+          <Route path="/staff/stock" element={<StockManagement />} />
+
           {/* Catch all route - redirect to landing if route not found */}
           <Route path="*" element={<Navigate to="/landing" replace />} />
         </Routes>
