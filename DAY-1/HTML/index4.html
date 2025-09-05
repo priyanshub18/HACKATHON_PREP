@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p class="text-red-500" id="new-para">
+        Stock Website
+    </p>
+    <button id="new-btn">Click me</button>
+    <button id="reset-btn">Reset</button>
+    <
+    <script> 
+        let iteration = 0
+        const new_Para = document.getElementById("new-para");
+        const new_Btn = document.getElementById("new-btn");
+        const reset_Btn = document.getElementById("reset-btn");
+
+        function randomStockPrice(){
+            return Math.floor(Math.random() * 100);
+        }
+
+        new_Btn.addEventListener("click", () => {
+            new_Para.textContent = "New Stock Price" + randomStockPrice();
+            iteration++;
+        });
+
+        reset_Btn.addEventListener("click", () => {
+            iteration = 0;
+            new_Para.textContent = "This is a new paragraph";
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-blue-600">My Dashboard</h1>
+    <nav class="flex gap-6">
+      <a href="#" class="text-gray-600 hover:text-blue-600">Home</a>
+      <a href="#" class="text-gray-600 hover:text-blue-600">Profile</a>
+      <a href="#" class="text-gray-600 hover:text-blue-600">Settings</a>
+    </nav>
+  </header>
+
+  <!-- Page Layout -->
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg min-h-screen p-6 hidden md:block">
+      <ul class="space-y-4">
+        <li><a href="#" class="block p-2 rounded-md hover:bg-blue-100">Dashboard</a></li>
+        <li><a href="#" class="block p-2 rounded-md hover:bg-blue-100">Products</a></li>
+        <li><a href="#" class="block p-2 rounded-md hover:bg-blue-100">Suppliers</a></li>
+        <li><a href="#" class="block p-2 rounded-md hover:bg-blue-100">Reports</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+      <!-- Hero / Welcome -->
+      <div class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-xl p-6 mb-6">
+        <h2 class="text-2xl font-semibold">Welcome Back!</h2>
+        <p class="mt-2">Here’s a quick overview of your inventory system today.</p>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Products</h3>
+          <p class="text-gray-500 mt-2">Manage and track all product details.</p>
+        </div>
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Suppliers</h3>
+          <p class="text-gray-500 mt-2">Keep supplier contacts and history updated.</p>
+        </div>
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Stock Levels</h3>
+          <p class="text-gray-500 mt-2">Monitor low and critical stock items.</p>
+        </div>
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Reports</h3>
+          <p class="text-gray-500 mt-2">Generate and export custom reports.</p>
+        </div>
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Alerts</h3>
+          <p class="text-gray-500 mt-2">Get notified about overdue or pending orders.</p>
+        </div>
+        <div class="bg-white shadow-md rounded-xl p-4">
+          <h3 class="text-lg font-semibold text-gray-700">Settings</h3>
+          <p class="text-gray-500 mt-2">Customize your preferences and roles.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

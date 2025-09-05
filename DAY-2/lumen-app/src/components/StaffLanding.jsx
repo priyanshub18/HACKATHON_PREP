@@ -1,0 +1,274 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Users, Package, BarChart3, Settings, LogOut, Shield, TrendingUp, AlertCircle, Plus, Eye } from 'lucide-react';
+
+const StaffLanding  = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalSuppliers: 0,
+    lowStockItems: 0
+  });
+
+  useEffect(() => {
+    setIsLoaded(true);
+    // Simulate loading stats
+    setTimeout(() => {
+      setStats({
+        totalUsers: 24,
+        totalProducts: 156,
+        totalSuppliers: 8,
+        lowStockItems: 12
+      });
+    }, 1000);
+  }, []);
+
+  const adminFeatures = [
+    {
+      title: "User Management",
+      description: "Manage user accounts, roles, and permissions",
+      icon: Users,
+      link: "/admin/users",
+      color: "from-blue-500 to-blue-600",
+      hoverColor: "hover:from-blue-600 hover:to-blue-700",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200"
+    },
+    {
+      title: "Product & Supplier Management",
+      description: "Manage products, suppliers, and procurement",
+      icon: Package,
+      link: "/admin/products",
+      color: "from-green-500 to-green-600",
+      hoverColor: "hover:from-green-600 hover:to-green-700",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200"
+    },
+    {
+      title: "Stock Management",
+      description: "Track inventory levels, stock movements, and alerts",
+      icon: BarChart3,
+      link: "/admin/stock",
+      color: "from-purple-500 to-purple-600",
+      hoverColor: "hover:from-purple-600 hover:to-purple-700",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-200"
+    }
+  ];
+
+  const quickActions = [
+    { title: "Add New User", icon: Plus, action: "addUser" },
+    { title: "Add Product", icon: Plus, action: "addProduct" },
+    { title: "View Reports", icon: BarChart3, action: "viewReports" },
+    { title: "System Settings", icon: Settings, action: "settings" }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      {/* Loading Screen */}
+      <div className={`fixed inset-0 bg-white z-50 flex items-center justify-center transition-opacity duration-1000 ${
+        isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="text-xl font-semibold text-gray-700 animate-pulse">Loading Admin Panel...</div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="bg-white/95 backdrop-blur-md shadow-lg border-b border-blue-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+                <p className="text-sm text-gray-500">StockMate Management System</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">Admin User</p>
+                <p className="text-xs text-gray-500">admin@stockmate.com</p>
+              </div>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className={`mb-8 transition-all duration-1000 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Admin!</h2>
+          <p className="text-gray-600">Manage your inventory system efficiently with our comprehensive admin tools.</p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 transition-all duration-1000 delay-200 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Products</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalProducts}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Suppliers</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalSuppliers}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
+                <p className="text-3xl font-bold text-red-600">{stats.lowStockItems}</p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Management Sections */}
+        <div className={`mb-8 transition-all duration-1000 delay-400 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Management Sections</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {adminFeatures.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <Link
+                  key={index}
+                  to={feature.link}
+                  className={`group relative bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 border ${feature.borderColor} hover:scale-105 overflow-hidden`}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                  <div className={`absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-400 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-500`}></div>
+                  
+                  <div className="relative z-10">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                      <IconComponent className="w-8 h-8 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300">
+                      {feature.title}
+                    </h4>
+                    <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300 mb-4">
+                      {feature.description}
+                    </p>
+                    <div className="flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+                      <span>Manage Now</span>
+                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className={`transition-all duration-1000 delay-600 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action, index) => {
+              const IconComponent = action.icon;
+              return (
+                <button
+                  key={index}
+                  className="group bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:scale-105"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-300">
+                    <IconComponent className="w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors duration-300">
+                    {action.title}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className={`mt-8 transition-all duration-1000 delay-800 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h3>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">New user registered</p>
+                    <p className="text-xs text-gray-500">John Doe joined the system</p>
+                  </div>
+                  <span className="text-xs text-gray-400">2 minutes ago</span>
+                </div>
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Product updated</p>
+                    <p className="text-xs text-gray-500">iPhone 15 Pro stock updated</p>
+                  </div>
+                  <span className="text-xs text-gray-400">15 minutes ago</span>
+                </div>
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Low stock alert</p>
+                    <p className="text-xs text-gray-500">MacBook Air running low</p>
+                  </div>
+                  <span className="text-xs text-gray-400">1 hour ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default StaffLanding;
