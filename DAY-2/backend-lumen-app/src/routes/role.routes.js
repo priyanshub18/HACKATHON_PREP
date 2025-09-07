@@ -5,9 +5,10 @@ import {
   getStaff,
   updateUserRole,
   getMyData,
-  staffOperations,
-  managerOperations,
-  adminOperations
+  createSupplier,
+  getAllSuppliers,
+  editSupplier,
+  deleteSupplier
 } from '../controllers/role.controller.js';
 import {
   authenticateToken,
@@ -22,8 +23,12 @@ const router = express.Router();
 // All authenticated users can access
 router.get('/my-data', authenticateToken, getMyData);
 
-// Staff level access
-router.get('/staff-operations', authenticateToken, staffOperations);
+// Supplier routes
+router.post('/supplier', authenticateToken , managerAndAdmin, createSupplier);
+router.get('/suppliers', authenticateToken, managerAndAdmin, getAllSuppliers);
+router.put('/supplier/:supplierId', authenticateToken, managerAndAdmin, editSupplier);
+router.delete('/supplier/:supplierId', authenticateToken, managerAndAdmin, deleteSupplier);
+
 
 // Manager and Admin access
 router.get('/staff', authenticateToken, managerAndAdmin, getStaff);
@@ -37,11 +42,9 @@ router.put('/user/:userId/role',
   ],
   updateUserRole
 );
-router.get('/manager-operations', authenticateToken, managerAndAdmin, managerOperations);
 
 // Admin only access
 router.get('/users', authenticateToken, adminOnly, getAllUsers);
 router.delete('/user/:userId', authenticateToken, adminOnly, deleteUser);
-router.get('/admin-operations', authenticateToken, adminOnly, adminOperations);
 
 export default router;

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, User as UserIcon, Mail, Lock } from 'lucide-react';
+import { Shield, User as UserIcon, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState('login');
@@ -9,8 +10,29 @@ const Login = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'staff'
   });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  const { login, register, error, clearError, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/landing');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear errors when switching tabs
+  useEffect(() => {
+    setErrors({});
+    clearError();
+    setSuccessMessage('');
+  }, [activeTab, clearError]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,20 +42,123 @@ const Login = () => {
     }));
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log('Login data:', { username: formData.username, password: formData.password });
-    // Add your login logic here
+  const validateForm = (isSignup = false) => {
+    const newErrors = {};
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one lowercase letter, one uppercase letter, and one number';
+    }
+
+    if (isSignup) {
+      if (!formData.username) {
+        newErrors.username = 'Username is required';
+      } else if (formData.username.length < 3) {
+        newErrors.username = 'Username must be at least 3 characters';
+      }
+
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Please confirm your password';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSignup = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
+    
+    if (!validateForm(false)) return;
+
+    setIsSubmitting(true);
+    setErrors({});
+    clearError();
+
+    try {
+      const result = await login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (result.success) {
+        // Redirect based on user role
+        const roleDashboard = {
+          admin: '/admin',
+          manager: '/manager',
+          staff: '/staff'
+        };
+        navigate(roleDashboard[result.user.role] || '/landing');
+      } else {
+        setErrors({ general: result.error });
+      }
+    } catch (err) {
+      setErrors({ general: err.message || 'Login failed. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
     }
-    console.log('Signup data:', formData);
-    // Add your signup logic here
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm(true)) return;
+
+    setIsSubmitting(true);
+    setErrors({});
+    clearError();
+
+    try {
+      const result = await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
+      });
+
+      if (result.success) {
+        setSuccessMessage('Registration successful! Redirecting...');
+        // Redirect based on user role
+        const roleDashboard = {
+          admin: '/admin',
+          manager: '/manager',
+          staff: '/staff'
+        };
+        setTimeout(() => {
+          navigate(roleDashboard[result.user.role] || '/landing');
+        }, 1500);
+      } else {
+        setErrors({ general: result.error });
+      }
+    } catch (err) {
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.errors) {
+        // Handle validation errors from server
+        const validationErrors = err.response.data.errors;
+        const firstError = validationErrors[0];
+        errorMessage = firstError.msg || firstError.message || errorMessage;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setErrors({ general: errorMessage });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const switchToLogin = () => {
@@ -131,6 +256,33 @@ const Login = () => {
             />
           </div>
 
+          {/* Error/Success Messages */}
+          {(error || errors.general) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-3"
+            >
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm font-medium">
+                {error || errors.general}
+              </p>
+            </motion.div>
+          )}
+
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3"
+            >
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+              <p className="text-green-700 text-sm font-medium">
+                {successMessage}
+              </p>
+            </motion.div>
+          )}
+
           {/* Form Content */}
           <AnimatePresence mode="wait">
             {activeTab === 'login' && (
@@ -144,22 +296,27 @@ const Login = () => {
               >
                 <form onSubmit={handleLogin} className="space-y-6">
                   <div>
-                    <label htmlFor="login-username" className="block text-sm font-medium text-gray-700 mb-2">
-                      Username
+                    <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
                     </label>
                     <div className="relative">
-                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
-                        id="login-username"
-                        name="username"
-                        type="text"
+                        id="login-email"
+                        name="email"
+                        type="email"
                         required
-                        value={formData.username}
+                        value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 outline-none"
-                        placeholder="Enter your username"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 outline-none ${
+                          errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
+                        placeholder="Enter your email"
                       />
                     </div>
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                    )}
                   </div>
 
                   <div>
@@ -175,10 +332,15 @@ const Login = () => {
                         required
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 outline-none"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 outline-none ${
+                          errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
                         placeholder="Enter your password"
                       />
                     </div>
+                    {errors.password && (
+                      <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                    )}
                   </div>
 
                   <div className="text-right">
@@ -192,11 +354,16 @@ const Login = () => {
 
                   <motion.button
                     type="submit"
-                    whileHover={{ scale: 1.03, boxShadow: '0 10px 25px rgba(37, 99, 235, 0.25)' }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
+                    disabled={isSubmitting}
+                    whileHover={!isSubmitting ? { scale: 1.03, boxShadow: '0 10px 25px rgba(37, 99, 235, 0.25)' } : {}}
+                    whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg ${
+                      isSubmitting
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                    } text-white`}
                   >
-                    Login
+                    {isSubmitting ? 'Logging in...' : 'Login'}
                   </motion.button>
                 </form>
               </motion.div>
@@ -225,10 +392,15 @@ const Login = () => {
                         required
                         value={formData.username}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none ${
+                          errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
                         placeholder="Choose a username"
                       />
                     </div>
+                    {errors.username && (
+                      <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                    )}
                   </div>
 
                   <div>
@@ -244,10 +416,15 @@ const Login = () => {
                         required
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none ${
+                          errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
                         placeholder="Enter your email"
                       />
                     </div>
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                    )}
                   </div>
 
                   <div>
@@ -263,10 +440,18 @@ const Login = () => {
                         required
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none ${
+                          errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
                         placeholder="Create a password"
                       />
                     </div>
+                    {errors.password && (
+                      <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                    )}
+                    {activeTab === 'signup' && formData.password && !errors.password && (
+                      <p className="mt-1 text-sm text-green-600">✓ Password meets requirements</p>
+                    )}
                   </div>
 
                   <div>
@@ -282,19 +467,46 @@ const Login = () => {
                         required
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none ${
+                          errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
                         placeholder="Confirm your password"
                       />
                     </div>
+                    {errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="signup-role" className="block text-sm font-medium text-gray-700 mb-2">
+                      Role
+                    </label>
+                    <select
+                      id="signup-role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 outline-none"
+                    >
+                      <option value="staff">Staff</option>
+                      <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
+                    </select>
                   </div>
 
                   <motion.button
                     type="submit"
-                    whileHover={{ scale: 1.03, boxShadow: '0 10px 25px rgba(22, 163, 74, 0.25)' }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg"
+                    disabled={isSubmitting}
+                    whileHover={!isSubmitting ? { scale: 1.03, boxShadow: '0 10px 25px rgba(22, 163, 74, 0.25)' } : {}}
+                    whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg ${
+                      isSubmitting
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
+                    } text-white`}
                   >
-                    Sign Up
+                    {isSubmitting ? 'Creating Account...' : 'Sign Up'}
                   </motion.button>
 
                   <div className="text-center">

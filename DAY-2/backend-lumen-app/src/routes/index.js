@@ -9,6 +9,9 @@ const router = Router();
 router.use('/health', healthRouter);
 router.use('/auth', authRouter);
 router.use('/api', roleRouter);
+
+
+// INFO route
 router.get('/', (req, res) => {
   res.json({
     name: 'backend-lumen-app',
@@ -18,6 +21,8 @@ router.get('/', (req, res) => {
     health: '/health',
   });
 });
+
+
 
 export default router;
 

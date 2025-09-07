@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Users, Package, BarChart3, Settings, LogOut, Shield, TrendingUp, AlertCircle, Plus, Eye, Clock, DollarSign, Activity, Bell, Search, Filter } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const AdminLanding = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -11,6 +12,9 @@ const AdminLanding = () => {
     lowStockItems: 0,
     monthlyRevenue: 0
   });
+
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -115,14 +119,23 @@ const AdminLanding = () => {
             <div className="flex items-center space-x-6">
               <div className="hidden md:flex items-center space-x-4">
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">Admin User</p>
-                  <p className="text-xs text-gray-500">admin@stockmate.com</p>
+                  <p className="text-sm font-semibold text-gray-900">{user?.username || 'Admin User'}</p>
+                  <p className="text-xs text-gray-500">{user?.email || 'admin@stockmate.com'}</p>
                 </div>
                 <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">AU</span>
+                  <span className="text-white font-semibold text-sm">
+                    {user?.username?.split(' ').map(n => n[0]).join('') || 'AU'}
+                  </span>
                 </div>
               </div>
-              <button className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 group">
+              <button 
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 group"
+                title="Logout"
+              >
                 <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
             </div>

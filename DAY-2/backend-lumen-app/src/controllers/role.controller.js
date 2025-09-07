@@ -1,5 +1,5 @@
 // Role-based controller to demonstrate different access levels
-
+import Supplier from '../models/SupplierModel.js';
 // Admin only - can manage all users
 export const getAllUsers = async (req, res) => {
   try {
@@ -135,38 +135,6 @@ export const getMyData = async (req, res) => {
   }
 };
 
-// Staff only - basic operations
-export const staffOperations = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Staff operations accessed successfully',
-    data: {
-      operations: [
-        'View own profile',
-        'Update own profile',
-        'Change password',
-        'View basic data'
-      ]
-    }
-  });
-};
-
-// Manager only - management operations
-export const managerOperations = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Manager operations accessed successfully',
-    data: {
-      operations: [
-        'View all staff',
-        'Update user roles',
-        'Manage team data',
-        'View reports'
-      ]
-    }
-  });
-};
-
 // Admin only - admin operations
 export const adminOperations = async (req, res) => {
   res.status(200).json({
@@ -182,3 +150,82 @@ export const adminOperations = async (req, res) => {
     }
   });
 };
+
+
+
+export const createSupplier = async ( req , res) => {
+  try{
+    const { name, contact, email, phone, address, city, country, status } = req.body;
+    const supplier = await Supplier.create({ name, contact, email, phone, address, city, country, status });
+    res.status(201).json({
+      success: true,
+      message: 'Supplier created successfully',
+      data: { supplier }
+    });
+  } catch (error) {
+    console.error('Create supplier error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } 
+  
+}
+
+
+export const getAllSuppliers = async ( req , res) => {
+  try{
+    const suppliers = await Supplier.find();
+    res.status(200).json({
+      success: true,
+      message: 'All suppliers retrieved successfully',
+      data: { suppliers }
+    });
+  }
+  catch (error) {
+    console.error('Get all suppliers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
+
+export const editSupplier = async ( req , res) => {
+  try{
+    const { supplierId } = req.params;
+    const { name, contact, email, phone, address, city, country, status } = req.body;
+    const supplier = await Supplier.findByIdAndUpdate(supplierId, { name, contact, email, phone, address, city, country, status }, { new: true });
+    res.status(200).json({
+      success: true,
+      message: 'Supplier updated successfully',
+      data: { supplier }
+    });
+  } catch (error) {
+    console.error('Edit supplier error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }   
+  
+}
+
+export const deleteSupplier = async ( req , res) => {
+  try{
+    const { supplierId } = req.params;
+    const supplier = await Supplier.findByIdAndDelete(supplierId);
+    res.status(200).json({
+      success: true,
+      message: 'Supplier deleted successfully',
+      data: { supplier }
+    });
+  }
+  catch (error) {
+    console.error('Delete supplier error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Plus, Edit, Trash2, Search, Filter, ArrowLeft, Eye, Shield, Mail, Phone, Calendar } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Search, Filter, ArrowLeft, Eye, Shield, Mail, Phone, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { userAPI } from '../services/api';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -12,108 +14,129 @@ const UserManagement = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const { user: currentUser } = useAuth();
 
   const [newUser, setNewUser] = useState({
-    name: '',
+    username: '',
     email: '',
-    phone: '',
-    role: 'user',
-    status: 'active',
-    joinDate: new Date().toISOString().split('T')[0]
+    password: '',
+    role: 'staff'
   });
 
-  // Sample data
+  // Load users from API
   useEffect(() => {
-    setIsLoaded(true);
-    const sampleUsers = [
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+1 (555) 123-4567',
-        role: 'admin',
-        status: 'active',
-        joinDate: '2024-01-15',
-        lastLogin: '2024-01-20'
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        phone: '+1 (555) 234-5678',
-        role: 'manager',
-        status: 'active',
-        joinDate: '2024-01-10',
-        lastLogin: '2024-01-19'
-      },
-      {
-        id: 3,
-        name: 'Mike Johnson',
-        email: 'mike.johnson@example.com',
-        phone: '+1 (555) 345-6789',
-        role: 'user',
-        status: 'inactive',
-        joinDate: '2024-01-05',
-        lastLogin: '2024-01-15'
-      },
-      {
-        id: 4,
-        name: 'Sarah Wilson',
-        email: 'sarah.wilson@example.com',
-        phone: '+1 (555) 456-7890',
-        role: 'user',
-        status: 'active',
-        joinDate: '2024-01-12',
-        lastLogin: '2024-01-20'
-      }
-    ];
-    setUsers(sampleUsers);
-    setFilteredUsers(sampleUsers);
+    loadUsers();
   }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await userAPI.getAllUsers();
+      
+      if (response.success) {
+        setUsers(response.data.users || []);
+        setFilteredUsers(response.data.users || []);
+      } else {
+        setError(response.message || 'Failed to load users');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+      setIsLoaded(true);
+    }
+  };
 
   // Filter and search users
   useEffect(() => {
     let filtered = users.filter(user => {
-      const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           user.email?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = filterRole === 'all' || user.role === filterRole;
       return matchesSearch && matchesRole;
     });
     setFilteredUsers(filtered);
   }, [searchTerm, filterRole, users]);
 
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
-    const user = {
-      ...newUser,
-      id: users.length + 1,
-      lastLogin: 'Never'
-    };
-    setUsers([...users, user]);
-    setNewUser({
-      name: '',
-      email: '',
-      phone: '',
-      role: 'user',
-      status: 'active',
-      joinDate: new Date().toISOString().split('T')[0]
-    });
-    setIsAddModalOpen(false);
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await userAPI.register(newUser);
+      
+      if (response.success) {
+        setSuccessMessage('User created successfully!');
+        setNewUser({
+          username: '',
+          email: '',
+          password: '',
+          role: 'staff'
+        });
+        setIsAddModalOpen(false);
+        loadUsers(); // Reload users list
+      } else {
+        setError(response.message || 'Failed to create user');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to create user');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditUser = (e) => {
+  const handleEditUser = async (e) => {
     e.preventDefault();
-    setUsers(users.map(user => 
-      user.id === selectedUser.id ? { ...selectedUser } : user
-    ));
-    setIsEditModalOpen(false);
-    setSelectedUser(null);
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await userAPI.updateUserRole(selectedUser.id, selectedUser.role);
+      
+      if (response.success) {
+        setSuccessMessage('User role updated successfully!');
+        setIsEditModalOpen(false);
+        setSelectedUser(null);
+        loadUsers(); // Reload users list
+      } else {
+        setError(response.message || 'Failed to update user');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update user');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteUser = () => {
-    setUsers(users.filter(user => user.id !== selectedUser.id));
-    setIsDeleteModalOpen(false);
-    setSelectedUser(null);
+  const handleDeleteUser = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await userAPI.deleteUser(selectedUser.id);
+      
+      if (response.success) {
+        setSuccessMessage('User deleted successfully!');
+        setIsDeleteModalOpen(false);
+        setSelectedUser(null);
+        loadUsers(); // Reload users list
+      } else {
+        setError(response.message || 'Failed to delete user');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to delete user');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openEditModal = (user) => {
@@ -130,13 +153,9 @@ const UserManagement = () => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
       case 'manager': return 'bg-blue-100 text-blue-800';
-      case 'user': return 'bg-green-100 text-green-800';
+      case 'staff': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const getStatusColor = (status) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -181,6 +200,33 @@ const UserManagement = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+            <p className="text-red-700 text-sm font-medium">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
+            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+            <p className="text-green-700 text-sm font-medium">{successMessage}</p>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="ml-auto text-green-500 hover:text-green-700"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Search and Filter */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
           <div className="flex flex-col md:flex-row gap-6">
@@ -204,7 +250,7 @@ const UserManagement = () => {
                 <option value="all">All Roles</option>
                 <option value="admin">Admin</option>
                 <option value="manager">Manager</option>
-                <option value="user">User</option>
+                <option value="staff">Staff</option>
               </select>
             </div>
           </div>
@@ -218,9 +264,7 @@ const UserManagement = () => {
                 <tr>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">User</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Role</th>
-                  <th className="px-8 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Status</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Join Date</th>
-                  <th className="px-8 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Last Login</th>
                   <th className="px-8 py-6 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -230,17 +274,13 @@ const UserManagement = () => {
                     <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                          {user.name.split(' ').map(n => n[0]).join('')}
+                          {user.username?.split(' ').map(n => n[0]).join('') || 'U'}
                         </div>
                         <div className="ml-6">
-                          <div className="text-lg font-bold text-gray-900">{user.name}</div>
+                          <div className="text-lg font-bold text-gray-900">{user.username}</div>
                           <div className="text-sm text-gray-500 flex items-center mt-1">
                             <Mail className="w-4 h-4 mr-2" />
                             {user.email}
-                          </div>
-                          <div className="text-sm text-gray-500 flex items-center mt-1">
-                            <Phone className="w-4 h-4 mr-2" />
-                            {user.phone}
                           </div>
                         </div>
                       </div>
@@ -250,17 +290,9 @@ const UserManagement = () => {
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </span>
                     </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <span className={`inline-flex px-4 py-2 text-sm font-bold rounded-xl ${getStatusColor(user.status)}`}>
-                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                      </span>
-                    </td>
                     <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(user.joinDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 font-medium">
-                      {user.lastLogin}
+                      {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-3">
@@ -295,12 +327,12 @@ const UserManagement = () => {
               <form onSubmit={handleAddUser}>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Name</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Username</label>
                     <input
                       type="text"
                       required
-                      value={newUser.name}
-                      onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({...newUser, username: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     />
                   </div>
@@ -315,11 +347,12 @@ const UserManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Phone</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
                     <input
-                      type="tel"
-                      value={newUser.phone}
-                      onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                      type="password"
+                      required
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     />
                   </div>
@@ -330,20 +363,9 @@ const UserManagement = () => {
                       onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     >
-                      <option value="user">User</option>
+                      <option value="staff">Staff</option>
                       <option value="manager">Manager</option>
                       <option value="admin">Admin</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                    <select
-                      value={newUser.status}
-                      onChange={(e) => setNewUser({...newUser, status: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
                     </select>
                   </div>
                 </div>
@@ -357,9 +379,14 @@ const UserManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+                    disabled={loading}
+                    className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl ${
+                      loading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
-                    Add User
+                    {loading ? 'Creating...' : 'Add User'}
                   </button>
                 </div>
               </form>
@@ -375,12 +402,12 @@ const UserManagement = () => {
               <form onSubmit={handleEditUser}>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Name</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Username</label>
                     <input
                       type="text"
                       required
-                      value={selectedUser.name}
-                      onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})}
+                      value={selectedUser.username}
+                      onChange={(e) => setSelectedUser({...selectedUser, username: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     />
                   </div>
@@ -395,35 +422,15 @@ const UserManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      value={selectedUser.phone}
-                      onChange={(e) => setSelectedUser({...selectedUser, phone: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                    />
-                  </div>
-                  <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Role</label>
                     <select
                       value={selectedUser.role}
                       onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     >
-                      <option value="user">User</option>
+                      <option value="staff">Staff</option>
                       <option value="manager">Manager</option>
                       <option value="admin">Admin</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                    <select
-                      value={selectedUser.status}
-                      onChange={(e) => setSelectedUser({...selectedUser, status: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
                     </select>
                   </div>
                 </div>
@@ -437,9 +444,14 @@ const UserManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+                    disabled={loading}
+                    className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl ${
+                      loading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
-                    Update User
+                    {loading ? 'Updating...' : 'Update User'}
                   </button>
                 </div>
               </form>
@@ -453,7 +465,7 @@ const UserManagement = () => {
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-4">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Delete User</h3>
               <p className="text-gray-600 mb-8 text-lg">
-                Are you sure you want to delete <strong className="text-red-600">{selectedUser.name}</strong>? This action cannot be undone.
+                Are you sure you want to delete <strong className="text-red-600">{selectedUser.username}</strong>? This action cannot be undone.
               </p>
               <div className="flex justify-end space-x-4">
                 <button
@@ -464,9 +476,14 @@ const UserManagement = () => {
                 </button>
                 <button
                   onClick={handleDeleteUser}
-                  className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+                  disabled={loading}
+                  className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl ${
+                    loading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-red-600 text-white hover:bg-red-700'
+                  }`}
                 >
-                  Delete User
+                  {loading ? 'Deleting...' : 'Delete User'}
                 </button>
               </div>
             </div>

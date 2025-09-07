@@ -16,10 +16,12 @@ const app = express();
 // Core middleware
 app.use(helmet());
 
-// CORS (Cross-Origin Resource Sharing) // local host 5172 allow my backend to repsonse to the frontend 
+// CORS (Cross-Origin Resource Sharing) - Allow frontend to communicate with backend
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5172'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 })); 
 
 // Convert your body to JSON 
@@ -29,6 +31,7 @@ app.use(cors({
 //   "email": "john@doe.com",
 //   "password": "123456"
 // }
+// Convert the body to the json
 app.use(express.json());
 
 
