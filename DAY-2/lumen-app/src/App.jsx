@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
 import Landing from './components/Landing'
 import Login from './components/Login'
 import AdminLanding from './components/AdminLanding'
@@ -23,83 +22,20 @@ function App() {
             <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             
-            {/* Protected Admin routes */}
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminLanding />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/users" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <UserManagement />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/products" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <ProductSupplierManagement />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/stock" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <StockManagement />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Admin routes - now accessible without authentication */}
+            <Route path="/admin" element={<AdminLanding />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/products" element={<ProductSupplierManagement />} />
+            <Route path="/admin/stock" element={<StockManagement />} />
 
-            {/* Protected Manager routes */}
-            <Route 
-              path="/manager" 
-              element={
-                <ProtectedRoute requiredRoles={['manager', 'admin']}>
-                  <ManagerLanding />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manager/products" 
-              element={
-                <ProtectedRoute requiredRoles={['manager', 'admin']}>
-                  <ProductSupplierManagement />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manager/stock" 
-              element={
-                <ProtectedRoute requiredRoles={['manager', 'admin']}>
-                  <StockManagement />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Manager routes - now accessible without authentication */}
+            <Route path="/manager" element={<ManagerLanding />} />
+            <Route path="/manager/products" element={<ProductSupplierManagement />} />
+            <Route path="/manager/stock" element={<StockManagement />} />
 
-            {/* Protected Staff routes */}
-            <Route 
-              path="/staff" 
-              element={
-                <ProtectedRoute requiredRoles={['staff', 'manager', 'admin']}>
-                  <StaffLanding />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/staff/stock" 
-              element={
-                <ProtectedRoute requiredRoles={['staff', 'manager', 'admin']}>
-                  <StockManagement />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Staff routes - now accessible without authentication */}
+            <Route path="/staff" element={<StaffLanding />} />
+            <Route path="/staff/stock" element={<StockManagement />} />
 
             {/* Catch all route - redirect to landing if route not found */}
             <Route path="*" element={<Navigate to="/landing" replace />} />

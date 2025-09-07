@@ -37,11 +37,6 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    status: {
-        type: String,
-        required: true,
-        enum: ['active', 'inactive']
-    },
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Supplier',

@@ -8,7 +8,18 @@ import {
   createSupplier,
   getAllSuppliers,
   editSupplier,
-  deleteSupplier
+  deleteSupplier,
+  createProduct,
+  getAllProducts,
+  editProduct,
+  deleteProduct,  
+  createUser,
+  editUser,
+  createStockMovement,
+  getStockStats,
+  getStats,
+  getAllStockMovements
+
 } from '../controllers/role.controller.js';
 import {
   authenticateToken,
@@ -30,6 +41,24 @@ router.put('/supplier/:supplierId', authenticateToken, managerAndAdmin, editSupp
 router.delete('/supplier/:supplierId', authenticateToken, managerAndAdmin, deleteSupplier);
 
 
+// Product CRUD
+router.post('/product', authenticateToken , managerAndAdmin, createProduct);
+router.get('/products', authenticateToken, managerAndAdmin, getAllProducts);
+router.put('/product/:productId', authenticateToken, managerAndAdmin, editProduct);
+router.delete('/product/:productId', authenticateToken, managerAndAdmin, deleteProduct);
+
+
+// User routes
+router.post('/user', authenticateToken, adminOnly, createUser);
+router.put('/user/:userId', authenticateToken, adminOnly, editUser);
+router.get('/users', authenticateToken, adminOnly, getAllUsers);
+router.delete('/user/:userId', authenticateToken, adminOnly, deleteUser);
+
+
+
+router.post('/stock-movement', authenticateToken, staffAndAbove, createStockMovement);
+router.post('/all-stock-movements', authenticateToken, staffAndAbove, getAllStockMovements);
+router.get('/stock-stats', authenticateToken, staffAndAbove, getStockStats);
 // Manager and Admin access
 router.get('/staff', authenticateToken, managerAndAdmin, getStaff);
 router.put('/user/:userId/role', 
@@ -44,7 +73,9 @@ router.put('/user/:userId/role',
 );
 
 // Admin only access
+router.post('/user', authenticateToken, adminOnly, createUser);
 router.get('/users', authenticateToken, adminOnly, getAllUsers);
 router.delete('/user/:userId', authenticateToken, adminOnly, deleteUser);
+router.get('/stats' , authenticateToken, adminOnly, getStats);
 
 export default router;

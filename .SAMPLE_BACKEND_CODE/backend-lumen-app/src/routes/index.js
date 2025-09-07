@@ -4,7 +4,6 @@ import healthRouter from './health.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
-
 router.get('/', (req, res) => {
   res.json({
     name: 'backend-lumen-app',

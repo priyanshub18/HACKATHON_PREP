@@ -12,67 +12,41 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Mock user data for testing - no authentication required
+  const [user, setUser] = useState({
+    _id: 'mock-user-id',
+    name: 'Test Admin',
+    email: 'admin@test.com',
+    role: 'admin'
+  });
+  const [token, setToken] = useState('mock-token-for-testing');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state with mock data
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-
-        if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
-          
-          // Verify token is still valid by fetching profile
-          try {
-            const profileResponse = await authAPI.getProfile();
-            if (profileResponse.success) {
-              setUser(profileResponse.data.user);
-              localStorage.setItem('user', JSON.stringify(profileResponse.data.user));
-            }
-          } catch (error) {
-            // Token is invalid, clear auth state
-            logout();
-          }
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
+    // Simulate loading completion
+    setLoading(false);
   }, []);
 
-  // Login function
+  // Login function - mock implementation for testing
   const login = async (credentials) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await authAPI.login(credentials);
+      // Mock successful login
+      const mockUser = {
+        _id: 'mock-user-id',
+        name: 'Test Admin',
+        email: credentials.email || 'admin@test.com',
+        role: 'admin'
+      };
       
-      if (response.success) {
-        const { user: userData, token: authToken } = response.data;
-        
-        setUser(userData);
-        setToken(authToken);
-        
-        // Store in localStorage
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', authToken);
-        
-        return { success: true, user: userData };
-      } else {
-        throw new Error(response.message || 'Login failed');
-      }
+      setUser(mockUser);
+      setToken('mock-token-for-testing');
+      
+      return { success: true, user: mockUser };
     } catch (error) {
       const errorMessage = error.message || 'Login failed. Please try again.';
       setError(errorMessage);
@@ -82,28 +56,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register function
+  // Register function - mock implementation for testing
   const register = async (userData) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await authAPI.register(userData);
+      // Mock successful registration
+      const mockUser = {
+        _id: 'mock-user-id',
+        name: userData.name || 'Test User',
+        email: userData.email || 'user@test.com',
+        role: 'admin'
+      };
       
-      if (response.success) {
-        const { user: newUser, token: authToken } = response.data;
-        
-        setUser(newUser);
-        setToken(authToken);
-        
-        // Store in localStorage
-        localStorage.setItem('user', JSON.stringify(newUser));
-        localStorage.setItem('token', authToken);
-        
-        return { success: true, user: newUser };
-      } else {
-        throw new Error(response.message || 'Registration failed');
-      }
+      setUser(mockUser);
+      setToken('mock-token-for-testing');
+      
+      return { success: true, user: mockUser };
     } catch (error) {
       const errorMessage = error.message || 'Registration failed. Please try again.';
       setError(errorMessage);
@@ -113,33 +83,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  // Logout function - mock implementation for testing
   const logout = () => {
-    setUser(null);
-    setToken(null);
+    // Keep mock user for testing - just clear error
     setError(null);
-    
-    // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
   };
 
-  // Update profile function
+  // Update profile function - mock implementation for testing
   const updateProfile = async (profileData) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await authAPI.updateProfile(profileData);
+      // Mock successful profile update
+      const updatedUser = {
+        ...user,
+        ...profileData
+      };
+      setUser(updatedUser);
       
-      if (response.success) {
-        const updatedUser = response.data.user;
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return { success: true, user: updatedUser };
-      } else {
-        throw new Error(response.message || 'Profile update failed');
-      }
+      return { success: true, user: updatedUser };
     } catch (error) {
       const errorMessage = error.message || 'Profile update failed. Please try again.';
       setError(errorMessage);
@@ -149,19 +112,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Change password function
+  // Change password function - mock implementation for testing
   const changePassword = async (passwordData) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await authAPI.changePassword(passwordData);
-      
-      if (response.success) {
-        return { success: true };
-      } else {
-        throw new Error(response.message || 'Password change failed');
-      }
+      // Mock successful password change
+      return { success: true };
     } catch (error) {
       const errorMessage = error.message || 'Password change failed. Please try again.';
       setError(errorMessage);

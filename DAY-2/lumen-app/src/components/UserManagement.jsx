@@ -37,14 +37,40 @@ const UserManagement = () => {
       setLoading(true);
       setError(null);
       
-      const response = await userAPI.getAllUsers();
+      // Mock data for testing - no API call needed
+      const mockUsers = [
+        {
+          id: '1',
+          username: 'John Admin',
+          email: 'john@admin.com',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          username: 'Jane Manager',
+          email: 'jane@manager.com',
+          role: 'manager',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '3',
+          username: 'Bob Staff',
+          email: 'bob@staff.com',
+          role: 'staff',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '4',
+          username: 'Alice Admin',
+          email: 'alice@admin.com',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        }
+      ];
       
-      if (response.success) {
-        setUsers(response.data.users || []);
-        setFilteredUsers(response.data.users || []);
-      } else {
-        setError(response.message || 'Failed to load users');
-      }
+      setUsers(mockUsers);
+      setFilteredUsers(mockUsers);
     } catch (err) {
       setError(err.message || 'Failed to load users');
     } finally {
@@ -71,21 +97,26 @@ const UserManagement = () => {
       setLoading(true);
       setError(null);
       
-      const response = await userAPI.register(newUser);
+      // Mock user creation for testing
+      const newUserData = {
+        id: Date.now().toString(),
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role,
+        createdAt: new Date().toISOString()
+      };
       
-      if (response.success) {
-        setSuccessMessage('User created successfully!');
-        setNewUser({
-          username: '',
-          email: '',
-          password: '',
-          role: 'staff'
-        });
-        setIsAddModalOpen(false);
-        loadUsers(); // Reload users list
-      } else {
-        setError(response.message || 'Failed to create user');
-      }
+      setUsers(prev => [...prev, newUserData]);
+      setFilteredUsers(prev => [...prev, newUserData]);
+      
+      setSuccessMessage('User created successfully!');
+      setNewUser({
+        username: '',
+        email: '',
+        password: '',
+        role: 'staff'
+      });
+      setIsAddModalOpen(false);
     } catch (err) {
       setError(err.message || 'Failed to create user');
     } finally {
@@ -100,16 +131,21 @@ const UserManagement = () => {
       setLoading(true);
       setError(null);
       
-      const response = await userAPI.updateUserRole(selectedUser.id, selectedUser.role);
+      // Mock user update for testing
+      setUsers(prev => prev.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, username: selectedUser.username, email: selectedUser.email, role: selectedUser.role }
+          : user
+      ));
+      setFilteredUsers(prev => prev.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, username: selectedUser.username, email: selectedUser.email, role: selectedUser.role }
+          : user
+      ));
       
-      if (response.success) {
-        setSuccessMessage('User role updated successfully!');
-        setIsEditModalOpen(false);
-        setSelectedUser(null);
-        loadUsers(); // Reload users list
-      } else {
-        setError(response.message || 'Failed to update user');
-      }
+      setSuccessMessage('User updated successfully!');
+      setIsEditModalOpen(false);
+      setSelectedUser(null);
     } catch (err) {
       setError(err.message || 'Failed to update user');
     } finally {
@@ -122,16 +158,13 @@ const UserManagement = () => {
       setLoading(true);
       setError(null);
       
-      const response = await userAPI.deleteUser(selectedUser.id);
+      // Mock user deletion for testing
+      setUsers(prev => prev.filter(user => user.id !== selectedUser.id));
+      setFilteredUsers(prev => prev.filter(user => user.id !== selectedUser.id));
       
-      if (response.success) {
-        setSuccessMessage('User deleted successfully!');
-        setIsDeleteModalOpen(false);
-        setSelectedUser(null);
-        loadUsers(); // Reload users list
-      } else {
-        setError(response.message || 'Failed to delete user');
-      }
+      setSuccessMessage('User deleted successfully!');
+      setIsDeleteModalOpen(false);
+      setSelectedUser(null);
     } catch (err) {
       setError(err.message || 'Failed to delete user');
     } finally {

@@ -11,6 +11,7 @@ const ProtectedRoute = ({
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
 
+  // For testing purposes - always allow access
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -23,37 +24,7 @@ const ProtectedRoute = ({
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to={fallbackPath} state={{ from: location }} replace />;
-  }
-
-  // Check role-based access
-  if (requiredRole && user?.role !== requiredRole) {
-    // Redirect to appropriate dashboard based on user role
-    const roleDashboard = {
-      admin: '/admin',
-      manager: '/manager',
-      staff: '/staff'
-    };
-    
-    const redirectPath = roleDashboard[user?.role] || '/landing';
-    return <Navigate to={redirectPath} replace />;
-  }
-
-  // Check multiple roles access
-  if (requiredRoles && !requiredRoles.includes(user?.role)) {
-    // Redirect to appropriate dashboard based on user role
-    const roleDashboard = {
-      admin: '/admin',
-      manager: '/manager',
-      staff: '/staff'
-    };
-    
-    const redirectPath = roleDashboard[user?.role] || '/landing';
-    return <Navigate to={redirectPath} replace />;
-  }
-
+  // Always allow access for testing - no authentication required
   return children;
 };
 

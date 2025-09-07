@@ -8,13 +8,11 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor - no authentication required for testing
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Always add mock token for testing
+    config.headers.Authorization = `Bearer mock-token-for-testing`;
     return config;
   },
   (error) => {
@@ -22,18 +20,14 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle common errors
+// Response interceptor - simplified for testing
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
+    // Don't redirect on auth errors for testing
+    console.log('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
